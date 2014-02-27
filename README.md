@@ -4,6 +4,19 @@ Spark - a Sinatra inspired web framework
 **Fork Information:**
 
 -------------------------------
+ignoreAfterHandling flag on Route class can be set to enforce Spark not write
+to output
+
+```java
+//
+// Set changes will be ignored after calling the
+// {@link #handle(Request, Response) handle} method.
+// 
+//
+public void setIgnoreAfterHandling(boolean ignoreAfterHandling) {
+	this.ignoreAfterHandling = ignoreAfterHandling;
+}
+-------------------------------
 Route class now has a flag indicating that the writing has already been made
 after the handle method, enabling directly writing to response output stream.
 

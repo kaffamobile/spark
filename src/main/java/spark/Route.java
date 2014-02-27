@@ -30,7 +30,7 @@ public abstract class Route extends AbstractRoute {
 
 	private final String path;
 	private final String acceptType;
-	private final boolean ignoreAfterHandling;
+	private boolean ignoreAfterHandling;
 
 	/**
 	 * Constructor
@@ -131,6 +131,15 @@ public abstract class Route extends AbstractRoute {
 	 */
 	public boolean ignoreAfterHandling() {
 		return this.ignoreAfterHandling;
+	}
+	
+	/**
+	 * Set changes will be ignored after calling the
+	 * {@link #handle(Request, Response) handle} method.
+	 * 
+	 */
+	public void setIgnoreAfterHandling(boolean ignoreAfterHandling) {
+		this.ignoreAfterHandling = ignoreAfterHandling;
 	}
 
 	/**
