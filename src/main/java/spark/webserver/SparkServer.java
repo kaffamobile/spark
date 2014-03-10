@@ -29,6 +29,7 @@ public interface SparkServer {
      *
      * @param host The address to listen on
      * @param port - the port
+     * @param securePort - the port for secure connection
      * @param keystoreFile       - The keystore file location as string
      * @param keystorePassword   - the password for the keystore
      * @param truststoreFile     - the truststore file location as string, leave null to reuse keystore
@@ -39,6 +40,7 @@ public interface SparkServer {
     void ignite(
             String host, 
             int port, 
+            int securePort,
             String keystoreFile, 
             String keystorePassword, 
             String truststoreFile, 

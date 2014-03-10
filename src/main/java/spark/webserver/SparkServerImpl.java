@@ -48,28 +48,42 @@ class SparkServerImpl implements SparkServer {
     }
 
     @Override
-    public void ignite(String host, int port, String keystoreFile,
+    public void ignite(String host, int port, int securePort, String keystoreFile,
             String keystorePassword, String truststoreFile,
             String truststorePassword, String staticFilesFolder,
             String externalFilesFolder) {
         
-        ServerConnector connector;
+    	server = new Server();
         
-        if (keystoreFile == null) {
-            connector = createSocketConnector();
-        } else {
-            connector = createSecureSocketConnector(keystoreFile,
-                    keystorePassword, truststoreFile, truststorePassword);
-        }
+        ArrayList<Connector> connectors = new ArrayList<Connector>();
 
+        // Creates a HTTP connector
+        ServerConnector connector = createSocketConnector(server);
+        
         // Set some timeout options to make debugging easier.
         connector.setIdleTimeout(TimeUnit.HOURS.toMillis(1));
         connector.setSoLingerTime(-1);
         connector.setHost(host);
         connector.setPort(port);
+        
+        connectors.add(connector);
+        
+        if (keystoreFile != null) {
+        	// Creates a secure connector
+            ServerConnector secConnector = createSecureSocketConnector(keystoreFile,
+                    keystorePassword, truststoreFile, truststorePassword, server);
+            
+            secConnector.setIdleTimeout(TimeUnit.HOURS.toMillis(1));
+            secConnector.setSoLingerTime(-1);
+            secConnector.setHost(host);
+            secConnector.setPort(securePort);
+            
+            connectors.add(secConnector);
+        }
 
-        server = connector.getServer();
-        server.setConnectors(new Connector[] { connector });
+        //server = connector.getServer();
+        //server.setConnectors(new Connector[] { connector });
+        server.setConnectors(connectors.toArray(new Connector[0]));
 
         // Handle static file routes
         if (staticFilesFolder == null && externalFilesFolder == null) {
@@ -131,6 +145,47 @@ class SparkServerImpl implements SparkServer {
             String keystorePassword, String truststoreFile,
             String truststorePassword) {
 
+        SslContextFactory sslContextFactory = getSslContextFactory(keystoreFile, 
+        		keystorePassword, truststoreFile, truststorePassword);
+
+        return new ServerConnector(new Server(), sslContextFactory);
+    }
+    
+    /**
+     * Creates a secure jetty socket connector. Keystore required, truststore
+     * optional. If truststore not specifed keystore will be reused.
+     * 
+     * @param keystoreFile The keystore file location as string
+     * @param keystorePassword the password for the keystore
+     * @param truststoreFile the truststore file location as string, leave null to reuse keystore
+     * @param truststorePassword the trust store password
+     * @param server the server instance to append the connector
+     * 
+     * @return a secure socket connector
+     */
+    private static ServerConnector createSecureSocketConnector(String keystoreFile,
+            String keystorePassword, String truststoreFile,
+            String truststorePassword, Server server) {
+
+        SslContextFactory sslContextFactory = getSslContextFactory(keystoreFile, 
+        		keystorePassword, truststoreFile, truststorePassword);
+
+        return new ServerConnector(server, sslContextFactory);
+    }
+    
+    /**
+     * Configures a SslContextFactory
+     * 
+     * @param keystoreFile
+     * @param keystorePassword
+     * @param truststoreFile
+     * @param truststorePassword
+     * @return
+     */
+    private static SslContextFactory getSslContextFactory(String keystoreFile,
+            String keystorePassword, String truststoreFile,
+            String truststorePassword) {
+
         SslContextFactory sslContextFactory = new SslContextFactory(
                 keystoreFile);
 
@@ -143,7 +198,7 @@ class SparkServerImpl implements SparkServer {
         if (truststorePassword != null) {
             sslContextFactory.setTrustStorePassword(truststorePassword);
         }
-        return new ServerConnector(new Server(), sslContextFactory);
+        return sslContextFactory;
     }
 
     /**
@@ -153,6 +208,16 @@ class SparkServerImpl implements SparkServer {
      */
     private static ServerConnector createSocketConnector() {
         return new ServerConnector(new Server());
+    }
+
+    /**
+     * Creates an ordinary, non-secured Jetty server connector.
+     * 
+     * @param the server instance to append the connector
+     * @return
+     */
+    private static ServerConnector createSocketConnector(Server server) {
+        return new ServerConnector(server);
     }
 
     /**

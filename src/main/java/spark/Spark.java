@@ -52,6 +52,7 @@ import spark.webserver.SparkServerFactory;
 public final class Spark {
 
     private static final int SPARK_DEFAULT_PORT = 4567;
+    private static final int SPARK_DEFAULT_SECUREPORT = 4453;
 
     private static boolean initialized = false;
 
@@ -59,6 +60,7 @@ public final class Spark {
     private static RouteMatcher routeMatcher;
     private static String ipAddress = "0.0.0.0";
     private static int port = SPARK_DEFAULT_PORT;
+    private static int securePort = SPARK_DEFAULT_SECUREPORT;
 
     private static String keystoreFile;
     private static String keystorePassword;
@@ -97,6 +99,19 @@ public final class Spark {
             throwBeforeRouteMappingException();
         }
         Spark.port = port;
+    }
+    
+    /**
+     * Set the secure port that Spark should listen on. If not called the default port
+     * is 4453. This has to be called before any route mapping is done.
+     *
+     * @param port The port number for secure connection
+     */
+    public static synchronized void setSecurePort(int securePort) {
+        if (initialized) {
+            throwBeforeRouteMappingException();
+        }
+        Spark.securePort = securePort;
     }
 
     /**
@@ -304,6 +319,7 @@ public final class Spark {
                     server.ignite(
                             ipAddress,
                             port,
+                            securePort,
                             keystoreFile,
                             keystorePassword,
                             truststoreFile,
