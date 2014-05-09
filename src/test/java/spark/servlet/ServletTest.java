@@ -19,6 +19,7 @@ public class ServletTest {
 
     private static final String SOMEPATH = "/somepath";
     private static final int PORT = 9393;
+    private static final int SECURE_PORT = 9394;
     static final Server server = new Server();
 
     static SparkTestUtil testUtil;
@@ -31,7 +32,7 @@ public class ServletTest {
 
     @BeforeClass
     public static void setup() {
-        testUtil = new SparkTestUtil(PORT);
+        testUtil = new SparkTestUtil(PORT, SECURE_PORT);
 
         final Server server = new Server();
         ServerConnector connector = new ServerConnector(server);

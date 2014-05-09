@@ -37,7 +37,7 @@ public class GenericIntegrationTest {
 
     @BeforeClass
     public static void setup() throws IOException {
-        testUtil = new SparkTestUtil(4567);
+        testUtil = new SparkTestUtil(4567, 4453);
 
         tmpExternalFile = new File(System.getProperty("java.io.tmpdir"), "externalFile.html");
 

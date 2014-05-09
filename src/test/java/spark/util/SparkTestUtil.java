@@ -35,13 +35,15 @@ import org.apache.http.util.EntityUtils;
 public class SparkTestUtil {
 
 	private int port;
+	private int securePort;
 
 	private HttpClient httpClient;
 
-	public SparkTestUtil(int port) {
+	public SparkTestUtil(int port, int securePort) {
 		this.port = port;
-		Scheme http = new Scheme("http", port, PlainSocketFactory.getSocketFactory());
-		Scheme https = new Scheme("https", port, new org.apache.http.conn.ssl.SSLSocketFactory(getSslFactory(), null));
+		this.securePort = securePort;
+		Scheme http = new Scheme("http", this.port, PlainSocketFactory.getSocketFactory());
+		Scheme https = new Scheme("https", this.securePort, new org.apache.http.conn.ssl.SSLSocketFactory(getSslFactory(), null));
 		SchemeRegistry sr = new SchemeRegistry();
 		sr.register(http);
 		sr.register(https);
@@ -94,6 +96,7 @@ public class SparkTestUtil {
 			String acceptType) {
 		try {
 			String protocol = secureConnection ? "https" : "http";
+			int port = secureConnection ? securePort : this.port;
 			String uri = protocol + "://localhost:" + port + path;
 
 			if (requestMethod.equals("GET")) {
